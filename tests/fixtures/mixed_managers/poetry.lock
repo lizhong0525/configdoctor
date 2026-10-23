@@ -1,0 +1,5 @@
+# Synthetic fixture: this is NOT a real poetry.lock, just a stand-in file so
+# ConfigDoctor detects a requirements.txt + poetry.lock manager mismatch.
+[[package]]
+name = "requests"
+version = "2.31.0"
