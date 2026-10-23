@@ -78,14 +78,16 @@ python -m configdoctor [path] [--json] [--share] [--fix] [--yes] [--ports 3000,8
 - `path` — project directory to diagnose (default: current directory)
 - `--json` — emit a redacted JSON report (safe to paste into an issue)
 - `--share` — redact home paths / usernames in the text report
-- `--fix` — interactively offer to run proposed (non-destructive) repair commands
+- `--fix` — interactively offer to run proposed (non-destructive) repair commands (not combinable with `--json`)
 - `--yes` — with `--fix`, skip the per-command confirmation prompt
 - `--ports` — comma-separated list of ports to check
+
+Usage errors (bad path, bad `--ports`, invalid flag combinations) exit `2`; `1` means diagnostics found an `error`-severity issue; `0` means clean.
 
 ## Development
 
 ```bash
-python -m pytest -q        # 59 tests, fully offline, no third-party deps
+python -m pytest -q        # 62 tests, fully offline, no third-party deps
 ```
 
 Architecture: `probe.py` builds an `EnvironmentSnapshot` from the real machine; `checks.py` is a set of pure functions over that snapshot (so tests inject synthetic snapshots and fixture directories); `report.py` renders text/JSON with redaction; `repair.py` handles the opt-in execution flow.
