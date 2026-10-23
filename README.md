@@ -5,10 +5,18 @@ A safe, read-only diagnostic CLI for Python developers: it inspects your local d
 ## Quickstart
 
 ```bash
+git clone <this-repo-url> && cd configdoctor
+python -m pip install .          # no runtime dependencies, stdlib only
+configdoctor path/to/your/project
+```
+
+Or, without installing, run it as a module **from the cloned repo directory**:
+
+```bash
 python -m configdoctor path/to/your/project
 ```
 
-No dependencies. Python 3.9+ standard library only. Nothing is sent anywhere; all probing is local and read-only.
+Python 3.9+, standard library only. Nothing is sent anywhere; all probing is local and read-only.
 
 ## What it checks
 

@@ -2,6 +2,9 @@ import contextlib
 import io
 import json
 import os
+import subprocess
+import sys
+import tempfile
 import unittest
 
 from configdoctor.cli import main
@@ -85,6 +88,24 @@ class CliValidationTests(unittest.TestCase):
     def test_custom_ports_accepted(self):
         code, out, _ = run_cli([os.path.join(FIXTURES, "healthy"), "--ports", "12345"])
         self.assertIn("12345", out)
+
+
+class CliEncodingTests(unittest.TestCase):
+    def test_non_ascii_path_survives_legacy_console_encoding(self):
+        # Simulate a Windows console stuck on a legacy codepage: even with
+        # PYTHONIOENCODING=cp1252 the report must be valid UTF-8 and must not
+        # mangle a non-ASCII project path.
+        with tempfile.TemporaryDirectory(prefix="configdoctor-草稿-") as tmp:
+            env = dict(os.environ, PYTHONIOENCODING="cp1252")
+            proc = subprocess.run(
+                [sys.executable, "-m", "configdoctor", tmp],
+                cwd=os.path.dirname(os.path.dirname(FIXTURES)),
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        text = proc.stdout.decode("utf-8")
+        self.assertIn("草稿", text)
 
 
 if __name__ == "__main__":

@@ -48,7 +48,20 @@ def _parse_ports(raw: str):
     return ports
 
 
+def _force_utf8_stdio():
+    # Windows consoles default to a legacy codepage (e.g. cp936/cp1252), which
+    # mangles non-ASCII project paths in the report. Reconfigure when possible.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except (ValueError, OSError):
+                pass
+
+
 def main(argv=None) -> int:
+    _force_utf8_stdio()
     args = build_parser().parse_args(argv)
 
     if args.yes and not args.fix:
