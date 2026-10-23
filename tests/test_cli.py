@@ -74,16 +74,24 @@ class CliValidationTests(unittest.TestCase):
         self.assertIn("--fix", err)
 
     def test_invalid_port_rejected(self):
-        with self.assertRaises(SystemExit):
-            run_cli(["--ports", "abc"])
+        code, _, err = run_cli(["--ports", "abc"])
+        self.assertEqual(code, 2)
+        self.assertIn("invalid port", err)
 
     def test_out_of_range_port_rejected(self):
-        with self.assertRaises(SystemExit):
-            run_cli(["--ports", "70000"])
+        code, _, err = run_cli(["--ports", "70000"])
+        self.assertEqual(code, 2)
+        self.assertIn("out of range", err)
 
     def test_empty_ports_rejected(self):
-        with self.assertRaises(SystemExit):
-            run_cli(["--ports", ",,"])
+        code, _, err = run_cli(["--ports", ",,"])
+        self.assertEqual(code, 2)
+        self.assertIn("at least one port", err)
+
+    def test_json_and_fix_combination_rejected(self):
+        code, _, err = run_cli(["--json", "--fix"])
+        self.assertEqual(code, 2)
+        self.assertIn("--json", err)
 
     def test_custom_ports_accepted(self):
         code, out, _ = run_cli([os.path.join(FIXTURES, "healthy"), "--ports", "12345"])

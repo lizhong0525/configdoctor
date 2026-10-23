@@ -1,5 +1,7 @@
 import json
+import os
 import unittest
+import unittest.mock
 
 from configdoctor.model import EnvironmentSnapshot, Finding, Repair
 from configdoctor.redact import redact_text
@@ -39,6 +41,15 @@ class RedactTextTests(unittest.TestCase):
     def test_empty_identity_is_noop(self):
         out = redact_text("nothing to hide", home_dir="/nonexistent-hh", username="")
         self.assertIn("nothing to hide", out)
+
+    def test_survives_environment_without_username(self):
+        # Minimal containers unset USER/LOGNAME/etc.; getpass.getuser() then
+        # raises OSError on Python 3.13+. Redaction must not crash.
+        env = {k: v for k, v in os.environ.items()
+               if k not in ("LOGNAME", "USER", "LNAME", "USERNAME")}
+        with unittest.mock.patch.dict(os.environ, env, clear=True):
+            out = redact_text("still works", home_dir="/nonexistent-hh", username="")
+        self.assertIn("still works", out)
 
 
 def _snapshot() -> EnvironmentSnapshot:

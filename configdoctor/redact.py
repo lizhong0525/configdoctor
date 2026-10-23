@@ -11,9 +11,18 @@ import os
 import re
 
 
+def _current_username() -> str:
+    # getpass.getuser() raises OSError on Python 3.13+ when no user-related
+    # environment variable is set (minimal containers, CI sandboxes).
+    try:
+        return getpass.getuser()
+    except Exception:
+        return ""
+
+
 def _candidate_homes(home_dir: str = "", username: str = ""):
     home = home_dir or os.path.expanduser("~")
-    user = username or getpass.getuser()
+    user = username or _current_username()
     homes = {home, os.path.realpath(home)}
     # Common layouts, so redaction also works on synthetic snapshots.
     if user:

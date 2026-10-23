@@ -39,12 +39,12 @@ def _parse_ports(raw: str):
         try:
             port = int(chunk)
         except ValueError:
-            raise SystemExit(f"error: invalid port {chunk!r} in --ports")
+            raise ValueError(f"invalid port {chunk!r} in --ports")
         if not (1 <= port <= 65535):
-            raise SystemExit(f"error: port {port} out of range 1-65535")
+            raise ValueError(f"port {port} out of range 1-65535")
         ports.append(port)
     if not ports:
-        raise SystemExit("error: --ports must list at least one port")
+        raise ValueError("--ports must list at least one port")
     return ports
 
 
@@ -67,11 +67,19 @@ def main(argv=None) -> int:
     if args.yes and not args.fix:
         print("error: --yes only makes sense together with --fix", file=sys.stderr)
         return 2
+    if args.json and args.fix:
+        print("error: --json cannot be combined with --fix "
+              "(repairs need an interactive terminal)", file=sys.stderr)
+        return 2
     if not os.path.isdir(args.path):
         print(f"error: project path does not exist or is not a directory: {args.path}", file=sys.stderr)
         return 2
 
-    ports = _parse_ports(args.ports)
+    try:
+        ports = _parse_ports(args.ports)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     snap = probe(args.path, ports=ports)
     findings = run_all_checks(snap)
 

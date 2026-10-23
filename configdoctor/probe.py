@@ -59,10 +59,7 @@ def scan_project(project_path: str) -> tuple:
         if os.path.isfile(full):
             files.append(name)
         elif os.path.isdir(full) and name in VENV_DIR_NAMES:
-            if os.path.isfile(os.path.join(full, "pyvenv.cfg")):
-                venvs.append(name)
-            else:
-                venvs.append(name)  # directory exists; validity checked later
+            venvs.append(name)
     return files, venvs
 
 
